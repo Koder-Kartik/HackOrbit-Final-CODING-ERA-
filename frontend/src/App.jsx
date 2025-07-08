@@ -6,6 +6,9 @@ import Services from './Pages/LandingPage/Services';
 import Prices from './Pages/LandingPage/Prices';
 import ContactUs from './Pages/LandingPage/ContactUs';
 import './App.css';
+import Login from './Pages/AuthPages/Login/Login';
+import Signup from './Pages/AuthPages/SignUp/Signup';
+import DashboardLayout from './Pages/Profiles/DashboardLayout';
 import { useEffect } from 'react';
 
 function ScrollToTop() {
@@ -31,6 +34,9 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/prices" element={<Prices />} />
             <Route path="/contact" element={<ContactUs />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/dashboard/*" element={<DashboardLayout />} />
           </Routes>
         </main>
       </div>

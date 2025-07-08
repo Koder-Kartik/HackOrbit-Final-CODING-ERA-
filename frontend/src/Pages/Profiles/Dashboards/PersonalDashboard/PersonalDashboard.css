@@ -1,0 +1,28 @@
+.MuiCard-root {
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .MuiCard-root:hover {
+    transform: translateY(-4px);
+  }
+  
+  .MuiLinearProgress-root {
+    height: 8px;
+    border-radius: 4px;
+  }
+  
+  .MuiAvatar-root {
+    transition: transform 0.2s ease;
+  }
+  
+  .MuiCard-root:hover .MuiAvatar-root {
+    transform: scale(1.1);
+  }
+  
+  .MuiListItem-root {
+    transition: background-color 0.2s ease;
+  }
+  
+  .MuiListItem-root:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
