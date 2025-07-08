@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Signup.css';
 import { FaCheck, FaTimes, FaEye, FaEyeSlash } from 'react-icons/fa';
+import axios from 'axios';
 import SuccessModal from '../../../Components/SuccessModal/SuccessModal';
 
 function Signup() {
@@ -27,15 +28,18 @@ function Signup() {
         hasLowerCase: false
     });
 
-    const validatePassword = (password) => ({
-        minLength: password.length >= 8,
-        hasUpperCase: /[A-Z]/.test(password),
-        hasNumber: /[0-9]/.test(password),
-        hasLowerCase: /[a-z]/.test(password)
-    });
+    const validatePassword = (password) => {
+        return {
+            minLength: password.length >= 8,
+            hasUpperCase: /[A-Z]/.test(password),
+            hasNumber: /[0-9]/.test(password),
+            hasLowerCase: /[a-z]/.test(password)
+        };
+    };
 
     useEffect(() => {
-        setPasswordValidation(validatePassword(formData.password));
+        const validationResult = validatePassword(formData.password);
+        setPasswordValidation(validationResult);
     }, [formData.password]);
 
     const handleInputChange = (e) => {
@@ -44,6 +48,7 @@ function Signup() {
             ...prev,
             [name]: value
         }));
+
         if (errors[name]) {
             setErrors(prev => ({
                 ...prev,
@@ -52,15 +57,14 @@ function Signup() {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {};
 
-        if (!formData.name.trim()) {
-            newErrors.name = 'Name is required';
-        }
         if (!formData.username.trim()) {
             newErrors.username = 'Username is required';
+        }if (!formData.name.trim()) {
+            newErrors.name = 'name is required';
         }
         if (!formData.email.trim()) {
             newErrors.email = 'Email is required';
@@ -68,9 +72,10 @@ function Signup() {
             newErrors.email = 'Please enter a valid email';
         }
 
-        const isPasswordValid = Object.values(validatePassword(formData.password)).every(Boolean);
+        const validationResult = validatePassword(formData.password);
+        const isPasswordValid = Object.values(validationResult).every(Boolean);
         if (!isPasswordValid) {
-            newErrors.password = 'Password must meet all strength requirements';
+            newErrors.password = 'Password must be at least 8 characters long and contain at least one uppercase letter, one number, and one special character';
         }
 
         if (formData.password !== formData.confirmPassword) {
@@ -86,14 +91,27 @@ function Signup() {
             return;
         }
 
-        // Simulate successful registration
-        localStorage.setItem('userRole', formData.role);
-        setShowSuccessModal(true);
-
-        setTimeout(() => {
-            setShowSuccessModal(false);
-            navigate('/login');
-        }, 1500);
+        try {
+            const response = await axios.post('http://localhost:3001/register', {
+                name: formData.name,
+                username: formData.username,
+                email: formData.email,
+                password: formData.password,
+                role: formData.role
+            });
+            console.log('Registration successful:', response.data);
+            setShowSuccessModal(true);
+            setTimeout(() => {
+                setShowSuccessModal(false);
+                navigate('/login');
+            }, 1500);
+        } catch (error) {
+            console.error('Registration error:', error);
+            setErrors(prev => ({
+                ...prev,
+                submit: 'Registration failed. Please try again.'
+            }));
+        }
     };
 
     return (
@@ -106,19 +124,19 @@ function Signup() {
                 </div>
                 <form onSubmit={handleSubmit} className='signup-form'>
                     <div className='form-group-signup'>
-                        <label htmlFor='name'>Name</label>
+
+                    <label htmlFor='name'>Name</label>
                         <input
                             type='text'
                             id='name'
                             name='name'
                             value={formData.name}
                             onChange={handleInputChange}
-                            placeholder='Enter your real name'
+                            placeholder='Enter your Real Name'
                         />
-                        {errors.name && <span className='error-message'>{errors.name}</span>}
-                    </div>
+                        {errors.username && <span className='error-message'>{errors.username}</span>}
+                    </div><div className='form-group-signup'>
 
-                    <div className='form-group-signup'>
                         <label htmlFor='username'>Username</label>
                         <input
                             type='text'
@@ -168,15 +186,15 @@ function Signup() {
                             </div>
                             <div className={`validation-item ${passwordValidation.hasUpperCase ? 'valid' : 'invalid'}`}>
                                 <i>{passwordValidation.hasUpperCase ? <FaCheck /> : <FaTimes />}</i>
-                                One uppercase letter
+                                At least one uppercase letter
                             </div>
                             <div className={`validation-item ${passwordValidation.hasNumber ? 'valid' : 'invalid'}`}>
                                 <i>{passwordValidation.hasNumber ? <FaCheck /> : <FaTimes />}</i>
-                                One number
+                                At least one number
                             </div>
                             <div className={`validation-item ${passwordValidation.hasLowerCase ? 'valid' : 'invalid'}`}>
                                 <i>{passwordValidation.hasLowerCase ? <FaCheck /> : <FaTimes />}</i>
-                                One lowercase letter
+                                At least one lowercase letter
                             </div>
                         </div>
                         {errors.password && <span className='error-message'>{errors.password}</span>}

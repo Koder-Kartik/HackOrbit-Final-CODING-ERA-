@@ -1,4 +1,5 @@
 import './DashboardLayout.css';
+import { useUser } from '../../context/UserContext';
 import DoctorSidebar from '../../Components/Sidebar/DoctorSidebar/DoctorSidebar';
 import PatientSidebar from '../../Components/Sidebar/PatientSidebar/PatientSidebar';
 import LearnerSidebar from '../../Components/Sidebar/LearningSidebar/LearnerSidebar';
@@ -19,11 +20,10 @@ import SkinDiseaseFinder from './SkinDisease/SkinDiseaseFinder';
 import Home from './Homeer/Home';
 
 function DashboardLayout() {
-    // Get role from localStorage (fallback to empty string if not found)
-    const userRole = localStorage.getItem('userRole') || '';
+    const { userRole } = useUser();
 
     const getSidebar = () => {
-        switch (userRole) {
+        switch(userRole) {
             case 'doctor':
                 return <DoctorSidebar />;
             case 'patient':
@@ -37,7 +37,7 @@ function DashboardLayout() {
         }
     };
 
-    return (
+    return(
         <>
             {getSidebar()}
             <div className="Dashboard-Container">
@@ -59,7 +59,7 @@ function DashboardLayout() {
                 </Routes>
             </div>
         </>
-    );
+    )
 }
 
 export default DashboardLayout;
