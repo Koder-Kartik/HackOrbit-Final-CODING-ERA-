@@ -40,13 +40,13 @@ function DoctorSidebar() {
                     <FiUsers className="sb-nav-icon" />
                     {!isCollapsed && <span>Patients</span>}
                 </Link>
-                <Link to="/dashboard/disease-finder-reports" className={`sb-nav-link ${location.pathname === '/dashboard/disease-finder-reports' ? 'active' : ''}`}>
-                    <FiFileText className="sb-nav-icon" />
-                    {!isCollapsed && <span>Analysis with Reports</span>}
-                </Link>
                 <Link to="/dashboard/disease-finder-scans" className={`sb-nav-link ${location.pathname === '/dashboard/disease-finder-scans' ? 'active' : ''}`}>
                     <FiCamera className="sb-nav-icon" />
                     {!isCollapsed && <span>Analysis with Scans</span>}
+                </Link>
+                <Link to="/dashboard/disease-finder-reports" className={`sb-nav-link ${location.pathname === '/dashboard/disease-finder-reports' ? 'active' : ''}`}>
+                    <FiFileText className="sb-nav-icon" />
+                    {!isCollapsed && <span>Analysis with Reports</span>}
                 </Link>
                 <Link to="/dashboard/skin-disease-finder" className={`sb-nav-link ${location.pathname === '/dashboard/skin-disease-finder' ? 'active' : ''}`}>
                     <FiCamera className="sb-nav-icon" />
