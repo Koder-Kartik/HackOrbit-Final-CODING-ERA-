@@ -23,6 +23,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import './Pateints.css';
+import { FaEye, FaEyeSlash, FaRegCopy } from 'react-icons/fa';
 
 function Patients() {
   const [openRegisterModal, setOpenRegisterModal] = useState(false);
@@ -44,6 +45,10 @@ function Patients() {
   });
 
   const [formErrors, setFormErrors] = useState({});
+  const [passwordChange, setPasswordChange] = useState('');
+  const [passwordChangeError, setPasswordChangeError] = useState('');
+  const [passwordChangeSuccess, setPasswordChangeSuccess] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateForm = () => {
     const errors = {};
@@ -72,7 +77,7 @@ function Patients() {
   };
 
   useEffect(() => {
-    axios.get('http://localhost:3001/patients')
+    axios.get('https://hackorbit-final-coding-era.onrender.com/patients')
       .then(res => setPatients(res.data.patients))
       .catch(() => setPatients([]));
   }, []);
@@ -98,7 +103,7 @@ function Patients() {
       return;
     }
     try {
-      const res = await axios.post('http://localhost:3001/register-patient', {
+      const res = await axios.post('https://hackorbit-final-coding-era.onrender.com/register-patient', {
         name: newPatient.name,
         age: newPatient.age,
         gender: newPatient.gender,
@@ -125,6 +130,46 @@ function Patients() {
       setFormErrors({});
     } catch (err) {
       setFormErrors({ submit: 'Failed to register patient. Please try again.' });
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (!passwordChange || passwordChange.length < 6) {
+      setPasswordChangeError('Password must be at least 6 characters');
+      setPasswordChangeSuccess('');
+      return;
+    }
+    try {
+      const res = await axios.patch(`https://hackorbit-final-coding-era.onrender.com/patients/${selectedPatient._id}/password`, { newPassword: passwordChange });
+      setPasswordChangeSuccess('Password updated!');
+      setPasswordChangeError('');
+      setSelectedPatient(prev => ({ ...prev, _plainPassword: res.data.patient.plainPassword }));
+      setPatients(prev => prev.map(p => p._id === selectedPatient._id ? { ...p, _plainPassword: res.data.patient.plainPassword } : p));
+      setPasswordChange('');
+    } catch (err) {
+      setPasswordChangeError('Failed to update password');
+      setPasswordChangeSuccess('');
+    }
+  };
+
+  const handleCopyPassword = () => {
+    if (selectedPatient && selectedPatient._plainPassword) {
+      navigator.clipboard.writeText(selectedPatient._plainPassword);
+    } else if (generatedCredentials && generatedCredentials.password) {
+      navigator.clipboard.writeText(generatedCredentials.password);
+    } else if (passwordChange) {
+      navigator.clipboard.writeText(passwordChange);
+    }
+  };
+
+  const handleDeletePatient = async (id) => {
+    const confirm = window.confirm('Are you sure you want to delete this patient? This action cannot be undone.');
+    if (!confirm) return;
+    try {
+      await axios.delete(`https://hackorbit-final-coding-era.onrender.com/patients/${id}`);
+      setPatients(prev => prev.filter(p => p._id !== id));
+    } catch (err) {
+      alert('Failed to delete patient.');
     }
   };
 
@@ -172,8 +217,17 @@ function Patients() {
                   color="primary"
                   fullWidth
                   onClick={() => handleViewDetails(patient)}
+                  sx={{ mb: 1 }}
                 >
                   View More Details
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  fullWidth
+                  onClick={() => handleDeletePatient(patient._id)}
+                >
+                  Delete Patient
                 </Button>
               </CardContent>
             </Card>
@@ -420,282 +474,120 @@ function Patients() {
       >
         <Box sx={{
           ...modalStyle,
-          bgcolor: '#ffffff',
+          bgcolor: '#fff',
           borderRadius: '16px',
-          padding: '32px',
-          width: '70%'
+          padding: '32px 24px',
+          width: '100%',
+          maxWidth: '420px',
+          textAlign: 'left',
+          boxShadow: 6
         }}>
           {selectedPatient && (
             <>
-              <Typography 
-                variant="h4" 
-                component="h2" 
-                gutterBottom 
-                sx={{
-                  color: '#1976d2',
-                  textAlign: 'center',
-                  fontWeight: 600,
-                  mb: 4,
-                  borderBottom: '2px solid #1976d2',
-                  paddingBottom: '8px'
-                }}
-              >
-                {selectedPatient.name}'s Details
+              <Typography variant="h5" sx={{ color: '#1976d2', mb: 2, textAlign: 'center' }}>
+                Patient Details
               </Typography>
-              
-              <Box sx={{ mb: 4 }}>
-                <Typography 
-                  variant="h5" 
-                  gutterBottom 
-                  sx={{ 
-                    color: '#1976d2',
-                    fontWeight: 500,
-                    mb: 2
-                  }}
-                >
-                  Basic Information
-                </Typography>
-                <TableContainer 
-                  component={Paper} 
-                  sx={{ 
-                    boxShadow: 3,
-                    borderRadius: 2,
-                    overflow: 'hidden'
-                  }}
-                >
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell 
-                          component="th" 
-                          scope="row"
-                          sx={{ 
-                            fontWeight: 'bold',
-                            backgroundColor: '#f5f5f5',
-                            width: '200px'
-                          }}
-                        >
-                          Patient ID
-                        </TableCell>
-                        <TableCell>{selectedPatient.id}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell 
-                          component="th" 
-                          scope="row"
-                          sx={{ 
-                            fontWeight: 'bold',
-                            backgroundColor: '#f5f5f5'
-                          }}
-                        >
-                          Age
-                        </TableCell>
-                        <TableCell>{selectedPatient.age}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell 
-                          component="th" 
-                          scope="row"
-                          sx={{ 
-                            fontWeight: 'bold',
-                            backgroundColor: '#f5f5f5'
-                          }}
-                        >
-                          Disease/Problem
-                        </TableCell>
-                        <TableCell>{selectedPatient.disease}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell 
-                          component="th" 
-                          scope="row"
-                          sx={{ 
-                            fontWeight: 'bold',
-                            backgroundColor: '#f5f5f5'
-                          }}
-                        >
-                          Status
-                        </TableCell>
-                        <TableCell>
-                          <span style={{
-                            padding: '6px 12px',
-                            borderRadius: '20px',
-                            backgroundColor: selectedPatient.status === 'Active' ? '#e8f5e9' : '#ffebee',
-                            color: selectedPatient.status === 'Active' ? '#2e7d32' : '#c62828',
-                            fontWeight: 500
-                          }}>
-                            {selectedPatient.status}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell 
-                          component="th" 
-                          scope="row"
-                          sx={{ 
-                            fontWeight: 'bold',
-                            backgroundColor: '#f5f5f5'
-                          }}
-                        >
-                          Progress
-                        </TableCell>
-                        <TableCell>
-                          <span style={{
-                            padding: '6px 12px',
-                            borderRadius: '20px',
-                            backgroundColor: 
-                              selectedPatient.progress === 'Improving' ? '#e3f2fd' :
-                              selectedPatient.progress === 'Stable' ? '#f3e5f5' :
-                              '#fff3e0',
-                            color: 
-                              selectedPatient.progress === 'Improving' ? '#1565c0' :
-                              selectedPatient.progress === 'Stable' ? '#7b1fa2' :
-                              '#ef6c00',
-                            fontWeight: 500
-                          }}>
-                            {selectedPatient.progress}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell 
-                          component="th" 
-                          scope="row"
-                          sx={{ 
-                            fontWeight: 'bold',
-                            backgroundColor: '#f5f5f5'
-                          }}
-                        >
-                          Last Visit
-                        </TableCell>
-                        <TableCell>{selectedPatient.lastVisit}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell 
-                          component="th" 
-                          scope="row"
-                          sx={{ 
-                            fontWeight: 'bold',
-                            backgroundColor: '#f5f5f5'
-                          }}
-                        >
-                          Next Visit
-                        </TableCell>
-                        <TableCell>{selectedPatient.nextVisit}</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" sx={{ color: '#888', mb: 1 }}>Basic Information</Typography>
+                <Typography variant="body1"><b>Name:</b> {selectedPatient.name}</Typography>
+                <Typography variant="body1"><b>Email/ID:</b> {selectedPatient.email}</Typography>
+                <Typography variant="body1"><b>Age:</b> {selectedPatient.age}</Typography>
+                <Typography variant="body1"><b>Gender:</b> {selectedPatient.gender}</Typography>
+                <Typography variant="body1"><b>Contact Number:</b> {selectedPatient.contactNumber}</Typography>
+                <Typography variant="body1"><b>Address:</b> {selectedPatient.address}</Typography>
+                <Typography variant="body1"><b>Medical History:</b> {selectedPatient.medicalHistory}</Typography>
+                <Typography variant="body1"><b>Assigned Doctor:</b> {selectedPatient.assignedDoctor}</Typography>
               </Box>
-
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Typography 
-                    variant="h5" 
-                    gutterBottom 
-                    sx={{ 
-                      color: '#1976d2',
-                      fontWeight: 500,
-                      mb: 2
-                    }}
-                  >
-                    Medications
+              <hr style={{ margin: '18px 0', border: 'none', borderTop: '1px solid #e0e0e0' }} />
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" sx={{ color: '#888', mb: 1 }}>Patient Login Password</Typography>
+                {selectedPatient._plainPassword ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={selectedPatient._plainPassword}
+                      readOnly
+                      style={{ padding: '8px', borderRadius: '5px', border: '1px solid #ccc', width: '70%' }}
+                    />
+                    <Button onClick={() => setShowPassword(v => !v)} sx={{ minWidth: 0, px: 1 }}>
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </Button>
+                    <Button onClick={handleCopyPassword} sx={{ minWidth: 0, px: 1 }}><FaRegCopy /></Button>
+                  </Box>
+                ) : (
+                  <Typography variant="body2" sx={{ color: '#b91c1c' }}>
+                    Password is only shown after registration or change.
                   </Typography>
-                  <TableContainer 
-                    component={Paper} 
-                    sx={{ 
-                      boxShadow: 3,
-                      borderRadius: 2,
-                      overflow: 'hidden'
-                    }}
-                  >
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell 
-                            sx={{ 
-                              backgroundColor: '#f5f5f5',
-                              fontWeight: 'bold'
-                            }}
-                          >
-                            Medication Name
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {selectedPatient.medications.map((medication, index) => (
-                          <TableRow key={index}>
-                            <TableCell>{medication}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <Typography 
-                    variant="h5" 
-                    gutterBottom 
-                    sx={{ 
-                      color: '#1976d2',
-                      fontWeight: 500,
-                      mb: 2
-                    }}
-                  >
-                    Exercises
-                  </Typography>
-                  <TableContainer 
-                    component={Paper} 
-                    sx={{ 
-                      boxShadow: 3,
-                      borderRadius: 2,
-                      overflow: 'hidden'
-                    }}
-                  >
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell 
-                            sx={{ 
-                              backgroundColor: '#f5f5f5',
-                              fontWeight: 'bold'
-                            }}
-                          >
-                            Exercise Name
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {selectedPatient.exercises.map((exercise, index) => (
-                          <TableRow key={index}>
-                            <TableCell>{exercise}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Grid>
-              </Grid>
-
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+                )}
+              </Box>
+              <hr style={{ margin: '18px 0', border: 'none', borderTop: '1px solid #e0e0e0' }} />
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>Change Password</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={passwordChange}
+                    onChange={e => setPasswordChange(e.target.value)}
+                    placeholder="Enter new password"
+                    style={{ padding: '8px', borderRadius: '5px', border: '1px solid #ccc', width: '70%' }}
+                  />
+                  <Button onClick={() => setShowPassword(v => !v)} sx={{ minWidth: 0, px: 1 }}>
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </Button>
+                  <Button onClick={handleCopyPassword} sx={{ minWidth: 0, px: 1 }}><FaRegCopy /></Button>
+                </Box>
                 <Button
                   variant="contained"
-                  onClick={() => setOpenDetailsModal(false)}
-                  sx={{
-                    borderRadius: '8px',
-                    textTransform: 'none',
-                    px: 4,
-                    '&:hover': {
-                      backgroundColor: '#1565c0'
-                    }
-                  }}
+                  color="primary"
+                  sx={{ mt: 2, borderRadius: '8px', textTransform: 'none', px: 2, width: '100%' }}
+                  onClick={handlePasswordChange}
                 >
-                  Close
+                  Update Password
                 </Button>
+                {passwordChangeError && <Typography color="error" variant="caption" sx={{ display: 'block', mt: 1 }}>{passwordChangeError}</Typography>}
+                {passwordChangeSuccess && <Typography color="primary" variant="caption" sx={{ display: 'block', mt: 1 }}>{passwordChangeSuccess}</Typography>}
               </Box>
             </>
           )}
+        </Box>
+      </Modal>
+
+      <Modal
+        open={showCredentialsModal}
+        onClose={() => setShowCredentialsModal(false)}
+      >
+        <Box sx={{
+          ...modalStyle,
+          bgcolor: '#f9f9f9',
+          borderRadius: '16px',
+          padding: '32px',
+          width: '400px',
+          textAlign: 'center',
+        }}>
+          <Typography variant="h5" sx={{ color: '#1976d2', mb: 2 }}>
+            Patient Credentials
+          </Typography>
+          {generatedCredentials && (
+            <>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <b>Email/ID:</b> {generatedCredentials.email}
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <b>Password:</b> {generatedCredentials.password}
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#888', mt: 2 }}>
+                Please copy and share these credentials with the patient. They will use them to log in to their dashboard.
+              </Typography>
+            </>
+          )}
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3, borderRadius: '8px', textTransform: 'none', px: 4 }}
+            onClick={() => setShowCredentialsModal(false)}
+          >
+            Close
+          </Button>
         </Box>
       </Modal>
     </div>

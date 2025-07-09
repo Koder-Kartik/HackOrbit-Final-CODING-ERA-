@@ -125,6 +125,120 @@ app.post('/reset-password', async (req, res) => {
         res.status(500).json({ error: 'Failed to reset password' });
     }
 });
+function generatePatientEmail() {
+    const unique = Math.floor(100000 + Math.random() * 900000);
+    return `patient${unique}@vitalcheck.com`;
+}
+function generatePassword(length = 8) {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let pass = '';
+    for (let i = 0; i < length; i++) {
+        pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return pass;
+}
+
+app.post('/register-patient', async (req, res) => {
+    try {
+        const { name, age, gender, contactNumber, address, medicalHistory, assignedDoctor } = req.body;
+        if (!name || !age || !gender || !contactNumber) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        let email;
+        let exists = true;
+        // Ensure unique email
+        while (exists) {
+            email = generatePatientEmail();
+            exists = await UserModel.findOne({ email });
+        }
+        const password = generatePassword(10);
+        const newPatient = new UserModel({
+            name,
+            email,
+            password,
+            role: 'patient',
+            age,
+            gender,
+            contactNumber,
+            address,
+            medicalHistory,
+            assignedDoctor
+        });
+        await newPatient.save();
+        res.json({
+            status: 'success',
+            patient: {
+                _id: newPatient._id,
+                name,
+                email,
+                password,
+                role: 'patient',
+                age,
+                gender,
+                contactNumber,
+                address,
+                medicalHistory,
+                assignedDoctor
+            }
+        });
+    } catch (err) {
+        console.error('Register patient error:', err);
+        res.status(500).json({ error: 'Failed to register patient' });
+    }
+});
+
+app.get('/patients', async (req, res) => {
+    try {
+        const patients = await UserModel.find({ role: 'patient' });
+        res.json({ patients });
+    } catch (err) {
+        console.error('Fetch patients error:', err);
+        res.status(500).json({ error: 'Failed to fetch patients' });
+    }
+});
+
+app.patch('/patients/:id/password', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { newPassword } = req.body;
+        if (!newPassword) return res.status(400).json({ error: 'New password is required' });
+        const patient = await UserModel.findById(id);
+        if (!patient) return res.status(404).json({ error: 'Patient not found' });
+        patient.password = newPassword;
+        await patient.save();
+        res.json({
+            status: 'success',
+            patient: {
+                _id: patient._id,
+                name: patient.name,
+                email: patient.email,
+                plainPassword: newPassword,
+                role: patient.role,
+                age: patient.age,
+                gender: patient.gender,
+                contactNumber: patient.contactNumber,
+                address: patient.address,
+                medicalHistory: patient.medicalHistory,
+                assignedDoctor: patient.assignedDoctor
+            }
+        });
+    } catch (err) {
+        console.error('Update patient password error:', err);
+        res.status(500).json({ error: 'Failed to update password' });
+    }
+});
+
+app.delete('/patients/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deleted = await UserModel.findByIdAndDelete(id);
+        if (!deleted) return res.status(404).json({ error: 'Patient not found' });
+        res.json({ status: 'success' });
+    } catch (err) {
+        console.error('Delete patient error:', err);
+        res.status(500).json({ error: 'Failed to delete patient' });
+    }
+});
 
 app.listen(3001, () => {
     console.log('Server is running on port 3001');
