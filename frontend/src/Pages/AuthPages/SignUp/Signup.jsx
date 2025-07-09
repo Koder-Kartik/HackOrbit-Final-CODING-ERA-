@@ -95,7 +95,7 @@ function Signup() {
         }
 
         try {
-            const response = await axios.post('http://localhost:3001/register', {
+            const response = await axios.post('https://hackorbit-final-coding-era.onrender.com/register', {
                 name: formData.name,
                 username: formData.username,
                 email: formData.email,

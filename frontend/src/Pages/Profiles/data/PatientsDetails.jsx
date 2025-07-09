@@ -3,7 +3,7 @@
 export const patients = [
     { 
         id: 'P001', 
-        name: 'John Doe', 
+        name: 'Test 1', 
         age: 45, 
         disease: 'Hypertension', 
         exercises: ['Walking', 'Swimming'], 
@@ -15,7 +15,7 @@ export const patients = [
     },
     { 
         id: 'P002', 
-        name: 'Jane Smith', 
+        name: 'Test 2', 
         age: 38, 
         disease: 'Diabetes', 
         exercises: ['Cycling', 'Yoga'], 
@@ -27,7 +27,7 @@ export const patients = [
     },
     { 
         id: 'P003', 
-        name: 'Mike Johnson', 
+        name: 'Test 3', 
         age: 52, 
         disease: 'Arthritis', 
         exercises: ['Swimming', 'Stretching'], 
@@ -39,7 +39,7 @@ export const patients = [
     },
     { 
         id: 'P004', 
-        name: 'Sarah Williams', 
+        name: 'Test 4', 
         age: 41, 
         disease: 'Asthma', 
         exercises: ['Light Jogging', 'Breathing Exercises'], 
@@ -51,7 +51,7 @@ export const patients = [
     },
     { 
         id: 'P005', 
-        name: 'Sarah Williams', 
+        name: 'Test 5', 
         age: 41, 
         disease: 'Asthma', 
         exercises: ['Light Jogging', 'Breathing Exercises'], 
@@ -66,7 +66,7 @@ export const patients = [
 export const payments = [
     { 
         id: 'P001', 
-        name: 'Tester 1', 
+        name: 'Test 6', 
         status: 'Paid', 
         amount: 150, 
         date: '2024-01-15', 
@@ -77,7 +77,7 @@ export const payments = [
     },
     { 
         id: 'P002', 
-        name: 'Tester 2', 
+        name: 'Test 7', 
         status: 'Due', 
         amount: 200, 
         daysOverdue: 5, 
@@ -88,7 +88,7 @@ export const payments = [
     },
     { 
         id: 'P003', 
-        name: 'Tester 3', 
+        name: 'Test 8', 
         status: 'Paid', 
         amount: 180, 
         date: '2024-01-20', 
@@ -99,7 +99,7 @@ export const payments = [
     },
     { 
         id: 'P004', 
-        name: 'Tester 4', 
+        name: 'Test 9', 
         status: 'Overdue', 
         amount: 160, 
         daysOverdue: 10, 

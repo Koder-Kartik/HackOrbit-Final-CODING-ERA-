@@ -17,7 +17,6 @@ export function UserProvider({ children }) {
     }, [userRole]);
 
     useEffect(() => {
-        // Fetch user profile (including name) from backend
         async function fetchUserProfile() {
             try {
                 const res = await fetch('/api/user/profile', {
@@ -28,7 +27,7 @@ export function UserProvider({ children }) {
                     setName(data.name || '');
                 }
             } catch (err) {
-                // Optionally handle error
+                console.log(err);
             }
         }
         fetchUserProfile();

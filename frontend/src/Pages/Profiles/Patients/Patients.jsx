@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -21,13 +21,16 @@ import {
   TableRow,
   Paper
 } from '@mui/material';
-import { patients } from '../data/PatientsDetails';
+import axios from 'axios';
 import './Pateints.css';
 
 function Patients() {
   const [openRegisterModal, setOpenRegisterModal] = useState(false);
   const [openDetailsModal, setOpenDetailsModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [patients, setPatients] = useState([]);
+  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
+  const [generatedCredentials, setGeneratedCredentials] = useState(null);
   const [newPatient, setNewPatient] = useState({
     name: '',
     age: '',
@@ -68,6 +71,12 @@ function Patients() {
     overflow: 'auto',
   };
 
+  useEffect(() => {
+    axios.get('http://localhost:3001/patients')
+      .then(res => setPatients(res.data.patients))
+      .catch(() => setPatients([]));
+  }, []);
+
   const handleViewDetails = (patient) => {
     setSelectedPatient(patient);
     setOpenDetailsModal(true);
@@ -81,28 +90,42 @@ function Patients() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
     }
-    // Here you would typically make an API call to save the new patient
-    console.log('New patient data:', newPatient);
-    setOpenRegisterModal(false);
-    setNewPatient({
-      name: '',
-      age: '',
-      gender: '',
-      contactNumber: '',
-      email: '',
-      address: '',
-      medicalHistory: '',
-      assignedDoctor: '',
-      consent: false
-    });
-    setFormErrors({});
+    try {
+      const res = await axios.post('http://localhost:3001/register-patient', {
+        name: newPatient.name,
+        age: newPatient.age,
+        gender: newPatient.gender,
+        contactNumber: newPatient.contactNumber,
+        address: newPatient.address,
+        medicalHistory: newPatient.medicalHistory,
+        assignedDoctor: newPatient.assignedDoctor
+      });
+      setGeneratedCredentials(res.data.patient);
+      setShowCredentialsModal(true);
+      setOpenRegisterModal(false);
+      setPatients(prev => [...prev, res.data.patient]);
+      setNewPatient({
+        name: '',
+        age: '',
+        gender: '',
+        contactNumber: '',
+        email: '',
+        address: '',
+        medicalHistory: '',
+        assignedDoctor: '',
+        consent: false
+      });
+      setFormErrors({});
+    } catch (err) {
+      setFormErrors({ submit: 'Failed to register patient. Please try again.' });
+    }
   };
 
   return (
@@ -119,21 +142,30 @@ function Patients() {
       </Box>
 
       <Grid container spacing={3}>
-        {patients.map((patient) => (
-          <Grid item xs={12} sm={6} md={4} key={patient.id}>
+        {patients.map((patient, idx) => (
+          <Grid item xs={12} sm={6} md={4} key={patient._id || idx}>
             <Card sx={{ height: '100%' }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
                   {patient.name}
                 </Typography>
                 <Typography color="textSecondary">
-                  ID: {patient.id}
+                  Email/ID: {patient.email}
                 </Typography>
                 <Typography color="textSecondary">
                   Age: {patient.age}
                 </Typography>
                 <Typography color="textSecondary" gutterBottom>
-                  Disease: {patient.disease}
+                  Gender: {patient.gender}
+                </Typography>
+                <Typography color="textSecondary" gutterBottom>
+                  Contact: {patient.contactNumber}
+                </Typography>
+                <Typography color="textSecondary" gutterBottom>
+                  Address: {patient.address}
+                </Typography>
+                <Typography color="textSecondary" gutterBottom>
+                  Assigned Doctor: {patient.assignedDoctor}
                 </Typography>
                 <Button
                   variant="contained"
@@ -149,7 +181,6 @@ function Patients() {
         ))}
       </Grid>
 
-      {/* Register Patient Modal */}
       <Modal
         open={openRegisterModal}
         onClose={() => setOpenRegisterModal(false)}
@@ -253,22 +284,6 @@ function Patients() {
                 required
                 error={!!formErrors.contactNumber}
                 helperText={formErrors.contactNumber}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#1976d2',
-                    },
-                  },
-                }}
-              />
-              <TextField
-                label="Email"
-                name="email"
-                type="email"
-                value={newPatient.email || ''}
-                onChange={handleInputChange}
-                error={!!formErrors.email}
-                helperText={formErrors.email}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     '&:hover fieldset': {
@@ -399,7 +414,6 @@ function Patients() {
         </Box>
       </Modal>
 
-      {/* Patient Details Modal */}
       <Modal
         open={openDetailsModal}
         onClose={() => setOpenDetailsModal(false)}
@@ -429,7 +443,6 @@ function Patients() {
                 {selectedPatient.name}'s Details
               </Typography>
               
-              {/* Basic Information */}
               <Box sx={{ mb: 4 }}>
                 <Typography 
                   variant="h5" 
@@ -575,9 +588,7 @@ function Patients() {
                 </TableContainer>
               </Box>
 
-              {/* Medications and Exercises Grid */}
               <Grid container spacing={3}>
-                {/* Medications */}
                 <Grid item xs={12} md={6}>
                   <Typography 
                     variant="h5" 
@@ -622,7 +633,6 @@ function Patients() {
                   </TableContainer>
                 </Grid>
 
-                {/* Exercises */}
                 <Grid item xs={12} md={6}>
                   <Typography 
                     variant="h5" 

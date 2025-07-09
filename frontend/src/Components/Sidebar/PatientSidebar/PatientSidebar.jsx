@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../../../context/UserContext';
 import { FiSettings, FiLogOut, FiMenu, FiX, FiHome, FiUsers, FiFileText, FiCamera, FiBell, FiClipboard, FiDollarSign } from 'react-icons/fi';
-import defaultAvatar from '../../../assets/logo-user.png';
+import { FaUser } from 'react-icons/fa';
 import '../Sidebar.css';
 
 function PatientSidebar() {
@@ -51,9 +51,10 @@ function PatientSidebar() {
             </nav>
 
             <div className="sb-user-section">
-                <div className="sb-user-profile">
-                    <img src={defaultAvatar} alt="User Avatar" className="sb-avatar" draggable='false'/>
+            <div className="sb-user-profile">
+                <FaUser size={24} />
                     {!isCollapsed && <span className="sb-username">Arin Jain</span>}
+                    
                 </div>
                 <div className="sb-user-actions">
                     <Link to="/dashboard/settings" className="sb-action-btn">

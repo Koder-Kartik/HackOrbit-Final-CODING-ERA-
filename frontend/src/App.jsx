@@ -10,6 +10,7 @@ import Login from './Pages/AuthPages/Login/Login';
 import Signup from './Pages/AuthPages/SignUp/Signup';
 import DashboardLayout from './Pages/Profiles/DashboardLayout';
 import { useEffect } from 'react';
+import Forgot_Password from './Pages/AuthPages/Forgot_Password/Forgot_Password';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -36,6 +37,7 @@ function App() {
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<Forgot_Password />} />
             <Route path="/dashboard/*" element={<DashboardLayout />} />
           </Routes>
         </main>

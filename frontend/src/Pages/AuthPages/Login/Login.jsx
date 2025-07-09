@@ -13,8 +13,7 @@ function Login() {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        rememberMe: false,
-        role: ''
+        rememberMe: false
     });
 
     const handleInputChange = (e) => {
@@ -36,16 +35,9 @@ function Login() {
         setError('');
         setLoading(true);
         
-        if (!formData.role) {
-            setError('Please select a role');
-            setLoading(false);
-            return;
-        }
-
-        axios.post('http://localhost:3001/login', {
+        axios.post('https://hackorbit-final-coding-era.onrender.com/login', {
             email: formData.email,
-            password: formData.password,
-            role: formData.role
+            password: formData.password
         })
         .then(response => {
             setLoading(false);
@@ -107,23 +99,6 @@ function Login() {
                         >
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
-                    </div>
-                    <div className='form-group-signup'>
-                        <label htmlFor='role'>Role</label>
-                        <select
-                            id='role'
-                            name='role'
-                            value={formData.role}
-                            onChange={handleInputChange}
-                            required
-                            placeholder='Choose your role'
-                        >
-                            <option value='' disabled>Choose your role</option>
-                            <option value='doctor'>Doctor</option>
-                            <option value='patient'>Patient</option>
-                            {/* <option value='student'>Learning</option> */}
-                            <option value='personal'>Personal</option>
-                        </select>
                     </div>
                     {error && <div className='error-message'>{error}</div>}
                     <div className='form-options'>

@@ -16,7 +16,7 @@ EPOCHS = 40
 BRAIN_TUMOR_CLASSES = ['glioma', 'meningioma', 'notumor', 'pituitary']
 LUNG_CANCER_CLASSES = ['benign', 'malignant', 'normal']
 # SKIN_DISEASE_CLASSES = ['acne', 'eczema', 'melanoma', 'normal', 'psoriasis']
-# TUBERCULOSIS_CLASSES = ['normal', 'tuberculosis']
+TUBERCULOSIS_CLASSES = ['normal', 'tuberculosis']
 
 brain_model_path = 'brain_tumor_model.h5'
 if not os.path.exists(brain_model_path):
@@ -39,12 +39,12 @@ print('Lung cancer model loaded successfully!')
 # skin_model = tf.keras.models.load_model(skin_model_path)
 # print('Skin disease model loaded successfully!')
 
-# tb_model_path = 'chest_tuberculosis_model.h5'
-# if not os.path.exists(tb_model_path):
-#     raise FileNotFoundError(f'Tuberculosis model file not found: {tb_model_path}')
+tb_model_path = 'chest_tuberculosis_model.h5'
+if not os.path.exists(tb_model_path):
+    raise FileNotFoundError(f'Tuberculosis model file not found: {tb_model_path}')
 
-# tb_model = tf.keras.models.load_model(tb_model_path)
-# print('Tuberculosis model loaded successfully!')
+tb_model = tf.keras.models.load_model(tb_model_path)
+print('Tuberculosis model loaded successfully!')
 
 from flask_cors import CORS
 CORS(app)
@@ -75,10 +75,10 @@ def predict():
                 target_size = (224, 224)
                 model = lung_model
                 classes = LUNG_CANCER_CLASSES
-            # elif scan_type.lower() == 'xray' and body_part.lower() == 'chest':
-            #     target_size = (150, 150)
-            #     model = tb_model
-            #     classes = TUBERCULOSIS_CLASSES
+            elif scan_type.lower() == 'xray' and body_part.lower() == 'chest':
+                target_size = (150, 150)
+                model = tb_model
+                classes = TUBERCULOSIS_CLASSES
             else:
                 return jsonify({'error': 'Unsupported scan type or body part combination'}), 400
         # else:
