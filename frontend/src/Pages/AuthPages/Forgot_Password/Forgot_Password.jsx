@@ -56,7 +56,7 @@ function Forgot_Password() {
         setError(''); setSuccess(''); setLoading(true);
         try {
             await new Promise(res => setTimeout(res, 1200)); // Add delay
-            const res = await axios.post('http://localhost:3001/verify-otp', { email, otp });
+            const res = await axios.post('https://hackorbit-final-coding-era.onrender.com/verify-otp', { email, otp });
             setSuccess('OTP verified. You can now reset your password.');
             setStep(3);
         } catch (err) {
@@ -84,7 +84,7 @@ function Forgot_Password() {
             return;
         }
         try {
-            await axios.post('http://localhost:3001/reset-password', { email, otp, newPassword });
+            await axios.post('https://hackorbit-final-coding-era.onrender.com/reset-password', { email, otp, newPassword });
             setSuccess('Password reset successful! You can now log in.');
             setStep(4);
         } catch (err) {
