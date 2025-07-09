@@ -5,7 +5,13 @@ const userSchema = new mongoose.Schema({
     name: String,
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, required: true }
+    role: { type: String, required: true },
+    age: Number,
+    gender: String,
+    contactNumber: String,
+    address: String,
+    medicalHistory: String,
+    assignedDoctor: String
 });
 
 userSchema.pre('save', async function(next) {
