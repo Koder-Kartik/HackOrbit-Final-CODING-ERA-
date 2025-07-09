@@ -11,7 +11,11 @@ const userSchema = new mongoose.Schema({
     contactNumber: String,
     address: String,
     medicalHistory: String,
-    assignedDoctor: String
+    bloodGroup: String,
+    emergencyContact: String,
+    allergies: String,
+    occupation: String,
+    profileImage: { type: String, default: '' }
 });
 
 userSchema.pre('save', async function(next) {

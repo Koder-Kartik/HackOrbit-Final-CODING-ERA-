@@ -236,8 +236,8 @@ function Signup() {
                             className='role-select'
                         >
                             <option value='Choose your role' disabled>Choose your role</option>
-                            <option value='personal'>Personal</option>
                             <option value='doctor'>Doctor</option>
+                            <option value='personal'>Personal</option>
                         </select>
                         {errors.role && <span className='error-message'>{errors.role}</span>}
                     </div>

@@ -24,7 +24,6 @@ function InfoCard({ title, children, onViewDetails, patient }) {
     );
 }
 
-// Import new components and data
 import AllPatientsCard from './components/AllPatientsCard';
 import NotificationsCard from './components/NotificationsCard';
 import { patients, payments, appointments } from '../../data/PatientsDetails';
@@ -86,7 +85,6 @@ function DoctorsDashboard() {
                             {selectedPatient.name}'s Medications & Exercises
                         </h2>
                         <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                            {/* Medications Table */}
                             <TableContainer component={Paper} sx={{ flex: 1, minWidth: '300px', boxShadow: 3 }}>
                                 <Table>
                                     <TableHead>

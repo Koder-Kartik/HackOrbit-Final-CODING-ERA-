@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import {
   Button,
@@ -12,18 +11,22 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper
+  MenuItem
 } from '@mui/material';
 import axios from 'axios';
 import './Pateints.css';
 import { FaEye, FaEyeSlash, FaRegCopy } from 'react-icons/fa';
+
+const BACKEND_URL = 'https://hackorbit-final-coding-era.onrender.com';
+function getPatientImage(profileImage) {
+  if (!profileImage || profileImage === '/uploads/default-user.png') {
+    return '/default-user.png'; 
+  }
+  if (profileImage.startsWith('/uploads/')) {
+    return BACKEND_URL + profileImage;
+  }
+  return profileImage;
+}
 
 function Patients() {
   const [openRegisterModal, setOpenRegisterModal] = useState(false);
@@ -40,9 +43,14 @@ function Patients() {
     email: '',
     address: '',
     medicalHistory: '',
-    assignedDoctor: '',
-    consent: false
+    bloodGroup: '',
+    emergencyContact: '',
+    allergies: '',
+    occupation: '',
+    consent: false,
+    profileImage: null
   });
+  const [previewImage, setPreviewImage] = useState(null);
 
   const [formErrors, setFormErrors] = useState({});
   const [passwordChange, setPasswordChange] = useState('');
@@ -95,6 +103,18 @@ function Patients() {
     }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setNewPatient(prev => ({ ...prev, profileImage: file }));
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewImage(reader.result);
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewImage(null);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validateForm();
@@ -103,14 +123,16 @@ function Patients() {
       return;
     }
     try {
-      const res = await axios.post('https://hackorbit-final-coding-era.onrender.com/register-patient', {
-        name: newPatient.name,
-        age: newPatient.age,
-        gender: newPatient.gender,
-        contactNumber: newPatient.contactNumber,
-        address: newPatient.address,
-        medicalHistory: newPatient.medicalHistory,
-        assignedDoctor: newPatient.assignedDoctor
+      const formData = new FormData();
+      Object.entries(newPatient).forEach(([key, value]) => {
+        if (key === 'profileImage' && value) {
+          formData.append('profileImage', value);
+        } else if (key !== 'profileImage') {
+          formData.append(key, value);
+        }
+      });
+      const res = await axios.post('https://hackorbit-final-coding-era.onrender.com/register-patient', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       setGeneratedCredentials(res.data.patient);
       setShowCredentialsModal(true);
@@ -124,9 +146,14 @@ function Patients() {
         email: '',
         address: '',
         medicalHistory: '',
-        assignedDoctor: '',
-        consent: false
+        bloodGroup: '',
+        emergencyContact: '',
+        allergies: '',
+        occupation: '',
+        consent: false,
+        profileImage: null
       });
+      setPreviewImage(null);
       setFormErrors({});
     } catch (err) {
       setFormErrors({ submit: 'Failed to register patient. Please try again.' });
@@ -190,45 +217,13 @@ function Patients() {
         {patients.map((patient, idx) => (
           <Grid item xs={12} sm={6} md={4} key={patient._id || idx}>
             <Card sx={{ height: '100%' }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  {patient.name}
-                </Typography>
-                <Typography color="textSecondary">
-                  Email/ID: {patient.email}
-                </Typography>
-                <Typography color="textSecondary">
-                  Age: {patient.age}
-                </Typography>
-                <Typography color="textSecondary" gutterBottom>
-                  Gender: {patient.gender}
-                </Typography>
-                <Typography color="textSecondary" gutterBottom>
-                  Contact: {patient.contactNumber}
-                </Typography>
-                <Typography color="textSecondary" gutterBottom>
-                  Address: {patient.address}
-                </Typography>
-                <Typography color="textSecondary" gutterBottom>
-                  Assigned Doctor: {patient.assignedDoctor}
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  onClick={() => handleViewDetails(patient)}
-                  sx={{ mb: 1 }}
-                >
-                  View More Details
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  fullWidth
-                  onClick={() => handleDeletePatient(patient._id)}
-                >
-                  Delete Patient
-                </Button>
+              <CardContent style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <img src={getPatientImage(patient.profileImage)} alt="Profile" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: '50%', marginBottom: 8 }} />
+                <Typography variant="h6" gutterBottom>{patient.name}</Typography>
+                <Typography color="textSecondary">Age: {patient.age}</Typography>
+                <Typography color="textSecondary" gutterBottom>Gender: {patient.gender}</Typography>
+                <Button variant="contained" color="primary" fullWidth onClick={() => handleViewDetails(patient)} sx={{ mb: 1 }}>View More Details</Button>
+                <Button variant="outlined" color="error" fullWidth onClick={() => handleDeletePatient(patient._id)}>Delete Patient</Button>
               </CardContent>
             </Card>
           </Grid>
@@ -377,20 +372,10 @@ function Patients() {
                   },
                 }}
               />
-              <TextField
-                label="Assigned Doctor"
-                name="assignedDoctor"
-                value={newPatient.assignedDoctor || ''}
-                onChange={handleInputChange}
-                sx={{
-                  gridColumn: '1 / -1',
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#1976d2',
-                    },
-                  },
-                }}
-              />
+              <TextField label="Blood Group" name="bloodGroup" value={newPatient.bloodGroup || ''} onChange={handleInputChange} sx={{}} />
+              <TextField label="Emergency Contact" name="emergencyContact" value={newPatient.emergencyContact || ''} onChange={handleInputChange} sx={{}} />
+              <TextField label="Allergies" name="allergies" value={newPatient.allergies || ''} onChange={handleInputChange} sx={{}} />
+              <TextField label="Occupation" name="occupation" value={newPatient.occupation || ''} onChange={handleInputChange} sx={{}} />
               <FormControl error={!!formErrors.consent} sx={{ gridColumn: '1 / -1' }}>
                 <Box sx={{
                   display: 'flex',
@@ -426,6 +411,12 @@ function Patients() {
                   </Typography>
                 )}
               </FormControl>
+              <input type="file" accept="image/*" onChange={handleImageChange} style={{ marginBottom: 16 }} />
+              {previewImage ? (
+                <img src={previewImage} alt="Preview" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: '50%', marginBottom: 16 }} />
+              ) : (
+                <img src="/default-user.png" alt="Default" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: '50%', marginBottom: 16 }} />
+              )}
               <Box sx={{
                 display: 'flex',
                 justifyContent: 'flex-end',
@@ -496,7 +487,10 @@ function Patients() {
                 <Typography variant="body1"><b>Contact Number:</b> {selectedPatient.contactNumber}</Typography>
                 <Typography variant="body1"><b>Address:</b> {selectedPatient.address}</Typography>
                 <Typography variant="body1"><b>Medical History:</b> {selectedPatient.medicalHistory}</Typography>
-                <Typography variant="body1"><b>Assigned Doctor:</b> {selectedPatient.assignedDoctor}</Typography>
+                <Typography variant="body1"><b>Blood Group:</b> {selectedPatient.bloodGroup}</Typography>
+                <Typography variant="body1"><b>Emergency Contact:</b> {selectedPatient.emergencyContact}</Typography>
+                <Typography variant="body1"><b>Allergies:</b> {selectedPatient.allergies}</Typography>
+                <Typography variant="body1"><b>Occupation:</b> {selectedPatient.occupation}</Typography>
               </Box>
               <hr style={{ margin: '18px 0', border: 'none', borderTop: '1px solid #e0e0e0' }} />
               <Box sx={{ mb: 2 }}>

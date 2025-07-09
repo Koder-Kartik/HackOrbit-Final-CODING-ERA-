@@ -105,97 +105,97 @@ def predict():
         return jsonify({'error': str(e)}), 500
 
 
-# import fitz  
-# import pandas as pd
-# from sklearn.preprocessing import StandardScaler
+import fitz  
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
 
-# heart_model_path = './Reports/Blood_Reports/HeartDiseaseModel.h5'
-# if not os.path.exists(heart_model_path):
-#     raise FileNotFoundError(f'Heart disease model file not found: {heart_model_path}')
+heart_model_path = './Reports/Blood_Reports/HeartDiseaseModel.h5'
+if not os.path.exists(heart_model_path):
+    raise FileNotFoundError(f'Heart disease model file not found: {heart_model_path}')
 
-# heart_model = tf.keras.models.load_model(heart_model_path)
-# print('Heart disease model loaded successfully!')
+heart_model = tf.keras.models.load_model(heart_model_path)
+print('Heart disease model loaded successfully!')
 
-# heart_df = pd.read_csv("./dataset/BloodReport_HeartDeseise/heart_cleveland_upload.csv").dropna()
-# heart_scaler = StandardScaler()
-# heart_features = heart_df.drop('condition', axis=1).columns.tolist()
-# heart_scaler.fit(heart_df[heart_features])
+heart_df = pd.read_csv("./dataset/BloodReport_HeartDeseise/heart_cleveland_upload.csv").dropna()
+heart_scaler = StandardScaler()
+heart_features = heart_df.drop('condition', axis=1).columns.tolist()
+heart_scaler.fit(heart_df[heart_features])
 
-# feature_good_ranges = {
-#     'age': (0, 50),
-#     'chol': (0, 200),
-#     'trestbps': (90, 120),
-#     'thalach': (100, 200),
-#     'fbs': (0, 0),  # 0: No
-#     'exang': (0, 0),  # 0: No
-#     'oldpeak': (0, 1),
-#     'ca': (0, 0),
-# }
+feature_good_ranges = {
+    'age': (0, 50),
+    'chol': (0, 200),
+    'trestbps': (90, 120),
+    'thalach': (100, 200),
+    'fbs': (0, 0),  
+    'exang': (0, 0),  
+    'oldpeak': (0, 1),
+    'ca': (0, 0),
+}
 
-# @app.route('/predict-blood', methods=['POST'])
-# def predict_blood():
-#     if 'report' not in request.files:
-#         return jsonify({'error': 'No report file uploaded'}), 400
+@app.route('/predict-blood', methods=['POST'])
+def predict_blood():
+    if 'report' not in request.files:
+        return jsonify({'error': 'No report file uploaded'}), 400
 
-#     file = request.files['report']
-#     if file.filename == '':
-#         return jsonify({'error': 'Empty filename'}), 400
+    file = request.files['report']
+    if file.filename == '':
+        return jsonify({'error': 'Empty filename'}), 400
 
-#     try:
-#         pdf_bytes = file.read()
-#         pdf = fitz.open(stream=pdf_bytes, filetype="pdf")
-#         text = "\n".join([page.get_text() for page in pdf])
-#         pdf.close()
+    try:
+        pdf_bytes = file.read()
+        pdf = fitz.open(stream=pdf_bytes, filetype="pdf")
+        text = "\n".join([page.get_text() for page in pdf])
+        pdf.close()
 
-#         input_data = []
-#         for feature in heart_features:
-#             found = False
-#             for line in text.split('\n'):
-#                 if feature.lower() in line.lower():
-#                     numbers = [float(word) for word in line.split() if word.replace('.', '', 1).isdigit()]
-#                     if numbers:
-#                         input_data.append(numbers[0])
-#                         found = True
-#                         break
-#             if not found:
-#                 input_data.append(0.0)  
+        input_data = []
+        for feature in heart_features:
+            found = False
+            for line in text.split('\n'):
+                if feature.lower() in line.lower():
+                    numbers = [float(word) for word in line.split() if word.replace('.', '', 1).isdigit()]
+                    if numbers:
+                        input_data.append(numbers[0])
+                        found = True
+                        break
+            if not found:
+                input_data.append(0.0)  
 
-#         print('DEBUG input_data:', dict(zip(heart_features, input_data)))
+        print('DEBUG input_data:', dict(zip(heart_features, input_data)))
 
-#         if len(input_data) != len(heart_features):
-#             return jsonify({'error': 'Incomplete data extracted'}), 400
+        if len(input_data) != len(heart_features):
+            return jsonify({'error': 'Incomplete data extracted'}), 400
 
-#         healthy = True
-#         for k, v in zip(heart_features, input_data):
-#             if k in feature_good_ranges:
-#                 low, high = feature_good_ranges[k]
-#                 if not (low <= v <= high):
-#                     healthy = False
-#                     break
-#         if healthy:
-#             print('DEBUG: All features in good range, overriding to No Heart Disease')
-#             return jsonify({
-#                 'status': 'success',
-#                 'prediction': 'No Heart Disease',
-#                 'confidence': 100.0,
-#                 'features_used': {k: float(v) for k, v in zip(heart_features, input_data)}
-#             })
+        healthy = True
+        for k, v in zip(heart_features, input_data):
+            if k in feature_good_ranges:
+                low, high = feature_good_ranges[k]
+                if not (low <= v <= high):
+                    healthy = False
+                    break
+        if healthy:
+            print('DEBUG: All features in good range, overriding to No Heart Disease')
+            return jsonify({
+                'status': 'success',
+                'prediction': 'No Heart Disease',
+                'confidence': 100.0,
+                'features_used': {k: float(v) for k, v in zip(heart_features, input_data)}
+            })
 
-#         input_scaled = heart_scaler.transform([input_data])
-#         prediction = heart_model.predict(input_scaled)[0][0]
-#         print('DEBUG model prediction:', prediction)
-#         result = "Heart Disease Detected" if prediction > 0.5 else "No Heart Disease"
-#         confidence = prediction if prediction > 0.5 else 1 - prediction
+        input_scaled = heart_scaler.transform([input_data])
+        prediction = heart_model.predict(input_scaled)[0][0]
+        print('DEBUG model prediction:', prediction)
+        result = "Heart Disease Detected" if prediction > 0.5 else "No Heart Disease"
+        confidence = prediction if prediction > 0.5 else 1 - prediction
 
-#         return jsonify({
-#             'status': 'success',
-#             'prediction': result,
-#             'confidence': float(round(confidence * 100, 2)),
-#             'features_used': {k: float(v) for k, v in zip(heart_features, input_data)}
-#         })
+        return jsonify({
+            'status': 'success',
+            'prediction': result,
+            'confidence': float(round(confidence * 100, 2)),
+            'features_used': {k: float(v) for k, v in zip(heart_features, input_data)}
+        })
 
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

@@ -4,9 +4,10 @@ const cors = require('cors');
 const app = express();
 const UserModel = require('./models/users');
 const nodemailer = require('nodemailer');
-const crypto = require('crypto');
+// const crypto = require('crypto');
+const multer = require('multer');
+const path = require('path');
 
-// In-memory OTP store: { email: { otp, expiresAt } }
 const otpStore = {};
 
 app.use(express.json());
@@ -138,20 +139,33 @@ function generatePassword(length = 8) {
     return pass;
 }
 
-app.post('/register-patient', async (req, res) => {
+const upload = multer({
+    dest: path.join(__dirname, 'uploads/'),
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    fileFilter: (req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) {
+            return cb(new Error('Only image files are allowed!'), false);
+        }
+        cb(null, true);
+    }
+});
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+app.post('/register-patient', upload.single('profileImage'), async (req, res) => {
     try {
-        const { name, age, gender, contactNumber, address, medicalHistory, assignedDoctor } = req.body;
+        const { name, age, gender, contactNumber, address, medicalHistory, bloodGroup, emergencyContact, allergies, occupation } = req.body;
         if (!name || !age || !gender || !contactNumber) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
         let email;
         let exists = true;
-        // Ensure unique email
         while (exists) {
             email = generatePatientEmail();
             exists = await UserModel.findOne({ email });
         }
         const password = generatePassword(10);
+        let profileImage = req.file ? `/uploads/${req.file.filename}` : '/uploads/default-user.png';
         const newPatient = new UserModel({
             name,
             email,
@@ -162,7 +176,11 @@ app.post('/register-patient', async (req, res) => {
             contactNumber,
             address,
             medicalHistory,
-            assignedDoctor
+            bloodGroup,
+            emergencyContact,
+            allergies,
+            occupation,
+            profileImage
         });
         await newPatient.save();
         res.json({
@@ -178,7 +196,11 @@ app.post('/register-patient', async (req, res) => {
                 contactNumber,
                 address,
                 medicalHistory,
-                assignedDoctor
+                bloodGroup,
+                emergencyContact,
+                allergies,
+                occupation,
+                profileImage
             }
         });
     } catch (err) {
@@ -219,7 +241,6 @@ app.patch('/patients/:id/password', async (req, res) => {
                 contactNumber: patient.contactNumber,
                 address: patient.address,
                 medicalHistory: patient.medicalHistory,
-                assignedDoctor: patient.assignedDoctor
             }
         });
     } catch (err) {
