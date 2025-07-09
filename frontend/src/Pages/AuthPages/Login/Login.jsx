@@ -1,6 +1,6 @@
 import './Login.css';
 import { useState } from 'react';
-import SuccessModal from '../../../Components/SuccessModal/SuccessModal';
+import SuccessModal, { LoadingSpinner } from '../../../Components/SuccessModal/SuccessModal';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../../context/UserContext';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -29,13 +29,16 @@ function Login() {
 
     const [error, setError] = useState('');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
         
         if (!formData.role) {
             setError('Please select a role');
+            setLoading(false);
             return;
         }
 
@@ -45,6 +48,7 @@ function Login() {
             role: formData.role
         })
         .then(response => {
+            setLoading(false);
             if (response.data.status === 'Success') {
                 setUserRole(response.data.role);
                 setShowSuccessModal(true);
@@ -57,6 +61,7 @@ function Login() {
             }
         })
         .catch(err => {
+            setLoading(false);
             console.error('Login error:', err);
             setError('An error occurred during login. Please try again.');
         });
@@ -64,6 +69,7 @@ function Login() {
 
     return (
         <div className='login-container'>
+            {loading && <LoadingSpinner message="Logging in..." />}
             <SuccessModal isOpen={showSuccessModal} />
             <div className='login-box'>
                 <div className='login-header'>

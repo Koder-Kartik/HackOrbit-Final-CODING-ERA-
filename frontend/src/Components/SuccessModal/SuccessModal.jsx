@@ -17,4 +17,14 @@ function SuccessModal({ isOpen, message = 'Login Successful!' }) {
     );
 }
 
+// Simple loading spinner for use in login/signup
+export function LoadingSpinner({ message = 'Loading...' }) {
+    return (
+        <div className="loading-spinner-overlay">
+            <div className="loading-spinner" />
+            <div className="loading-message">{message}</div>
+        </div>
+    );
+}
+
 export default SuccessModal;

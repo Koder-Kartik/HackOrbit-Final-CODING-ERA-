@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './Signup.css';
 import { FaCheck, FaTimes, FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
-import SuccessModal from '../../../Components/SuccessModal/SuccessModal';
+import SuccessModal, { LoadingSpinner } from '../../../Components/SuccessModal/SuccessModal';
 
 function Signup() {
     const navigate = useNavigate();
@@ -21,6 +21,7 @@ function Signup() {
 
     const [errors, setErrors] = useState({});
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [passwordValidation, setPasswordValidation] = useState({
         minLength: false,
         hasUpperCase: false,
@@ -60,6 +61,7 @@ function Signup() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {};
+        setLoading(true);
 
         if (!formData.username.trim()) {
             newErrors.username = 'Username is required';
@@ -88,6 +90,7 @@ function Signup() {
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
+            setLoading(false);
             return;
         }
 
@@ -103,6 +106,7 @@ function Signup() {
             setShowSuccessModal(true);
             setTimeout(() => {
                 setShowSuccessModal(false);
+                setLoading(false);
                 navigate('/login');
             }, 1500);
         } catch (error) {
@@ -111,11 +115,13 @@ function Signup() {
                 ...prev,
                 submit: 'Registration failed. Please try again.'
             }));
+            setLoading(false);
         }
     };
 
     return (
         <div className='signup-container'>
+            {loading && <LoadingSpinner message="Signing up..." />}
             <SuccessModal isOpen={showSuccessModal} message="Registration Successful!" />
             <div className='signup-box'>
                 <div className='signup-header'>

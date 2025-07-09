@@ -5,6 +5,8 @@ import defaultAvatar from '../../../assets/logo-user.png';
 import '../Sidebar.css';
 import { useUser } from '../../../context/UserContext';
 
+import { FaUser } from 'react-icons/fa';
+
 function IndividualSidebar() {
     const [isCollapsed, setIsCollapsed] = useState(true);
     const location = useLocation();
@@ -52,9 +54,10 @@ function IndividualSidebar() {
             </nav>
 
             <div className="sb-user-section">
-                <div className="sb-user-profile">
-                    <img src={defaultAvatar} alt="User Avatar" className="sb-avatar" draggable='false'/>
+            <div className="sb-user-profile">
+                <FaUser size={24} />
                     {!isCollapsed && <span className="sb-username">Arin Jain</span>}
+                    
                 </div>
                 <div className="sb-user-actions">
                     <Link to="/dashboard/settings" className="sb-action-btn">

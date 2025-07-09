@@ -6,6 +6,7 @@ export function UserProvider({ children }) {
     const [userRole, setUserRole] = useState(() => {
         return localStorage.getItem('userRole') || '';
     });
+    const [name, setName] = useState('');
 
     useEffect(() => {
         if (userRole) {
@@ -15,14 +16,35 @@ export function UserProvider({ children }) {
         }
     }, [userRole]);
 
+    useEffect(() => {
+        // Fetch user profile (including name) from backend
+        async function fetchUserProfile() {
+            try {
+                const res = await fetch('/api/user/profile', {
+                    credentials: 'include',
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setName(data.name || '');
+                }
+            } catch (err) {
+                // Optionally handle error
+            }
+        }
+        fetchUserProfile();
+    }, []);
+
     const logout = () => {
         setUserRole('');
+        setName('');
         localStorage.removeItem('userRole');
     };
 
     const value = {
         userRole,
         setUserRole,
+        name,
+        setName,
         logout
     };
 

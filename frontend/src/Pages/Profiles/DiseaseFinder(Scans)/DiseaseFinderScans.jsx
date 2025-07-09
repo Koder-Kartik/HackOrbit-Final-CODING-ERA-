@@ -19,7 +19,7 @@ const SCAN_TYPES = [
     label: 'CT Scan',
     icon: '🫁',
     bodyParts: [
-      { key: 'lung', label: 'Lungs', icon: '🫁', enabled: false, benefit: 'Lung cancer and disease detection' },
+      { key: 'lung', label: 'Lungs', icon: '🫁', enabled: true, benefit: 'Lung cancer and disease detection' },
       { key: 'head', label: 'Head', icon: '🧑‍🦲', enabled: false, benefit: 'Head trauma and stroke evaluation' },
       { key: 'chest', label: 'Chest', icon: '🫀', enabled: false, benefit: 'Heart and chest disease analysis' },
       { key: 'abdomen', label: 'Abdomen', icon: '🫃', enabled: false, benefit: 'Abdominal organ assessment' },
@@ -29,9 +29,9 @@ const SCAN_TYPES = [
   {
     key: 'xray',
     label: 'X-Ray',
-    icon: '🦴',
+    icon: '🩻',
     bodyParts: [
-      { key: 'chest', label: 'Chest', icon: '🫀', enabled: false, benefit: 'Tuberculosis and chest disease detection' },
+      { key: 'chest', label: 'Chest', icon: '🫀', enabled: true, benefit: 'Tuberculosis and chest disease detection' },
       { key: 'bone', label: 'Bone', icon: '🦴', enabled: false, benefit: 'Bone fracture and injury detection' },
       { key: 'dental', label: 'Dental', icon: '🦷', enabled: false, benefit: 'Dental and jaw assessment' },
     ],
